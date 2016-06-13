@@ -1,6 +1,7 @@
 package timer
 
 import (
+	"log"
 	"sync"
 	"time"
 )
@@ -17,7 +18,7 @@ var TimerMap map[string]*Node = make(map[string]*Node) //保存待执行的计�
 
 type Timer struct {
 	Name        string            //定时器名称
-	Inteval     uint32            //时间间隔
+	Inteval     uint32            //时间间隔，即以插入该定时器的时间为起点，Inteval秒之后执行回调函数DoSomething()。例如进程插入该定时器的时间是2015-04-05 10:23:00，Inteval=5，则执行DoSomething()的时间就是2015-04-05 10:23:05。
 	DoSomething func(interface{}) //自定义事件处理函数，需要触发的事件
 	Args        interface{}       //上述函数的输入参数
 }
@@ -96,9 +97,9 @@ func Run() {
 	var i int = 0
 	for {
 		go step()
-		fmt.Printf("%ds %s\n", i, time.Now().Format("2006-01-02 15:04:05")) // 这是个奇葩,必须是这个时间点, 据说是go诞生之日, 记忆方法:6-1-2-3-4-5
 		i++
-		//间隔时间inteval
+		log.Printf("第%ds", i)
+		//间隔时间inteval=1s
 		time.Sleep(1 * time.Second)
 	}
 }
