@@ -1,4 +1,3 @@
-// timingwheel project main.go
 package main
 
 import (
@@ -7,30 +6,19 @@ import (
 	"timer_server/timer"
 )
 
-//全局变量定义
-var (
-	//timerMap      map[string]*util.Node = make(map[string]*util.Node) //保存待执行的计时器，方便按链表节点指针地址直接删除定时器
-	funcName map[string]func(interface{})
-)
-
-type TimerData struct {
-	exectime int64       //到期执行的时间,(unix时间戳格式)
-	funcName string      //函数名称
-	args     interface{} //函数参数
-}
-
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
+func callback1(args interface{}) {
+	//只执行一次的事件
+	if values, ok := args.([]string); ok {
+		var str1 string = values[0]
+		var str2 string = values[1]
+		log.Println("callback1(" + str1 + "," + str2 + ")")
+	} else {
+		log.Println("callback1()")
 	}
 }
 
-func callback1(args interface{}) {
-	log.Println("callback1")
-}
-
 func callback2(args interface{}) {
-	//每隔60秒
+	//每次在当前时间点之后5s插入一个定时器，这样就能形成每隔5秒调用一次callback2回调函数，可以用于周期性事件
 	timer.SetTimer("callback2", 5, callback2, args)
 	log.Println("callback2")
 }
@@ -38,8 +26,12 @@ func callback2(args interface{}) {
 func main() {
 	// cpu多核
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	timer.SetTimer("callback1", 1, callback1, nil)
-	timer.SetTimer("callback2", 5, callback2, nil)
-	//运行计时器，间隔1s
+	// 定时器1，传入两个参数
+	timer.SetTimer("callback1", 3, callback1, []string{"hello", "world"})
+	// 定时器2，不传参数
+	timer.SetTimer("callback2", 6, callback2, nil)
+	// 移除定时器
+	//timer.Delete(timer.TimerMap["callback2"])
+	//运行计时器
 	timer.Run()
 }
